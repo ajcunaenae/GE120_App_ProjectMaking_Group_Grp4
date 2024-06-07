@@ -75,7 +75,7 @@ export default function App() {
             bearing = "N/A";
         }
 
-        let azimuth_dd; // Calculate Azimuth in Decimal Degree
+        let azimuth_dd; // Calculate azimuth in decimal degrees
         if (lat > 0 && dep > 0) {
             azimuth_dd = bearing;
         } else if (lat < 0 && dep > 0) {
@@ -110,59 +110,59 @@ export default function App() {
 
     return (
         <View style={styles.box}>
-            <View style={styles.box_1}>
-                <Text style={styles.titleText}>BACKSIGHT CALCULATOR!</Text>
+            <View style={styles.box_title}>
+                <Text style={styles.text_title}>BACKSIGHT CALCULATOR!</Text>
             </View>
 
             <View style={styles.box_2}>
-                <View style={styles.box_2A}>
-                    <Text style={styles.case_design_1}>STATION OCCUPIED</Text>
+                <View style={styles.box_SO}>
+                    <Text style={styles.text_station}>STATION OCCUPIED</Text>
                 </View>
 
-                <View style={styles.box_2B}>
-                    <Text style={styles.case_design_2}>Northing</Text>
+                <View style={styles.box_SO_N}>
+                    <Text style={styles.text_NE}>Northing: </Text>
                     <TextInput
-                        style={styles.input}
+                        style={styles.text_inputN}
                         onChangeText={onChangeNorthing_SO}
                         value={Northing_SO_i}
-                        placeholder="Input Northing here"
-                        keyboardType="numeric"
+                        placeholder="Input text"
+                        keyboardType="numeric" // Allow only numbers as input
                     />
                 </View>
 
-                <View style={styles.box_2C}>
-                    <Text style={styles.case_design_2}>Easting</Text>
+                <View style={styles.box_SO_E}>
+                    <Text style={styles.text_NE}>Easting: </Text>
                     <TextInput
-                        style={styles.input}
+                        style={styles.text_inputE}
                         onChangeText={onChangeEasting_SO}
                         value={Easting_SO_i}
-                        placeholder="Input Easting here"
+                        placeholder="Input text"
                         keyboardType="numeric"
                     />
                 </View>
 
-                <View style={styles.box_2D}>
-                    <Text style={styles.case_design_1}>STATION SIGHTED</Text>
+                <View style={styles.box_SS}>
+                    <Text style={styles.text_station}>STATION SIGHTED</Text>
                 </View>
 
-                <View style={styles.box_2E}>
-                    <Text style={styles.case_design_2}>Northing</Text>
+                <View style={styles.box_SS_N}>
+                    <Text style={styles.text_NE}>Northing: </Text>
                     <TextInput
-                        style={styles.input}
+                        style={styles.text_inputN}
                         onChangeText={onChangeNorthing_SS}
                         value={Northing_SS_i}
-                        placeholder="Input Northing here"
+                        placeholder="Input text"
                         keyboardType="numeric"
                     />
                 </View>
 
-                <View style={styles.box_2F}>
-                    <Text style={styles.case_design_2}>Easting</Text>
+                <View style={styles.box_SS_E}>
+                    <Text style={styles.text_NE}>Easting: </Text>
                     <TextInput
-                        style={styles.input}
+                        style={styles.text_inputE}
                         onChangeText={onChangeEasting_SS}
                         value={Easting_SS_i}
-                        placeholder="Input Easting here"
+                        placeholder="Input text"
                         keyboardType="numeric"
                     />
                 </View>
@@ -177,14 +177,14 @@ export default function App() {
             </View>
 
             <View style={styles.box_3}>
-                <View style={styles.box_3A}>
-                    <Text style={styles.result_box_1}>Azimuth from the North:</Text>
-                    <Text style={styles.result_box_2}>{Azimuth}</Text>
+                <View style={styles.box_resultA}>
+                    <Text style={styles.text_result1}>Azimuth from the North:</Text>
+                    <Text style={styles.text_result2}>{Azimuth}</Text>
                 </View>
 
-                <View style={styles.box_3B}>
-                    <Text style={styles.result_box_1}>Backsight Distance:</Text>
-                    <Text style={styles.result_box_2}>{Distance}</Text>
+                <View style={styles.box_resultD}>
+                    <Text style={styles.text_result1}>Backsight Distance:</Text>
+                    <Text style={styles.text_result2}>{Distance}</Text>
                 </View>
             </View>
         </View>
@@ -198,13 +198,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
-    box_1: {
+    box_title: {
         width: '100%',
         height: '20%',
         alignItems: 'center',
         justifyContent: 'center'
     },
-    titleText: {
+    text_title: {
         fontSize: 50,
         alignItems: 'center',
         justifyContent: 'center',
@@ -218,66 +218,75 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 10
     },
-    box_2A: {
+    box_SO: {
         flexDirection: 'column',
         backgroundColor: '#F8DAE1',
         width: '100%',
         height: '10%',
         padding: 10
     },
-    box_2B: {
-        flexDirection: 'column',
+    box_SO_N: {
+        flexDirection: 'row',
         backgroundColor: '#F8DAE1',
         width: '100%',
         height: '20%',
         padding: 10
     },
-    box_2C: {
-        flexDirection: 'column',
+    box_SO_E: {
+        flexDirection: 'row',
         backgroundColor: '#F8DAE1',
         width: '100%',
         height: '20%',
         padding: 10
     },
-    box_2D: {
+    box_SS: {
         flexDirection: 'column',
         backgroundColor: '#F8DAE1',
         width: '100%',
         height: '10%',
         padding: 10
     },
-    box_2E: {
-        flexDirection: 'column',
+    box_SS_N: {
+        flexDirection: 'row',
         backgroundColor: '#F8DAE1',
         width: '100%',
         height: '20%',
         padding: 10
     },
-    box_2F: {
-        flexDirection: 'column',
+    box_SS_E: {
+        flexDirection: 'row',
         backgroundColor: '#F8DAE1',
         width: '100%',
         height: '20%',
         padding: 10
     },
-    case_design_1: {
+    text_station: {
         fontSize: 28,
         fontFamily: 'Georgia-Bold',
         alignItems: 'center',
         justifyContent: 'center',
         color: 'black'
     },
-    case_design_2: {
-        fontSize: 24,
+    text_NE: {
+        fontSize: 30,
         fontFamily: 'Georgia-Bold',
         alignItems: 'center',
         justifyContent: 'center',
         color: 'black'
     },
-    input: {
-        height: '50%',
+    text_inputN: {
+        height: 40,
         width: '70%',
-        fontSize: 35,
+        fontSize: 30,
+        color: 'black',
+        fontFamily: 'Georgia',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    text_inputE: {
+        height: 40,
+        width: '70%',
+        fontSize: 30,
         color: 'black',
         fontFamily: 'Georgia',
         alignItems: 'center',
@@ -288,7 +297,7 @@ const styles = StyleSheet.create({
         height: '35%',
         padding: 10
     },
-    box_3A: {
+    box_resultA: {
         flex: 1,
         backgroundColor: '#F8DAE1',
         width: '100%',
@@ -296,7 +305,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    box_3B: {
+    box_resultD: {
         flex: 1,
         backgroundColor: '#F8DAE1',
         width: '100%',
@@ -304,14 +313,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    result_box_1: {
+    text_result1: {
         fontSize: 30,
         fontFamily: 'Georgia-Bold',
         alignItems: 'center',
         justifyContent: 'center',
         color: 'black'
     },
-    result_box_2: {
+    text_result2: {
         fontSize: 40,
         fontFamily: 'Georgia',
         alignItems: 'center',
