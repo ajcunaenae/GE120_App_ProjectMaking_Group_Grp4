@@ -22,6 +22,35 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            {
+              "path": "./assets/fonts/helvetica.ttf",
+              "postScriptName": "Helvetica",
+              "name": "Helvetica"
+            },
+            {
+              "path": "./assets/fonts/helvetica-bold.ttf",
+              "postScriptName": "Helvetica-Bold",
+              "name": "Helvetica-Bold"
+            },
+            {
+              "path": "./assets/fonts/georgia.ttf",
+              "postScriptName": "Georgia",
+              "name": "Georgia"
+            },
+            {
+              "path": "./assets/fonts/georgia-bold.ttf",
+              "postScriptName": "Georgia-Bold",
+              "name": "Georgia-Bold"
+            }
+          ]
+        }
+      ]
+    ]
   }
 }

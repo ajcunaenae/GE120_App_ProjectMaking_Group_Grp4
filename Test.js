@@ -98,12 +98,12 @@ console.log("Distance: ", Distance);
   return (
     <View style={styles.box}>
       <View style={styles.box_1}>
-        <Text style={styles.titleText}>DMS-DD CONVERTER!</Text>
+        <Text style={styles.titleText}>BACKSIGHT CALCULATOR!</Text>
       </View>
       
       <View style={styles.box_2}>
         <View style={styles.box_2A}>
-          <Text style={styles.case_design}>Input case</Text>
+          <Text style={styles.case_design}>Station Occupied</Text>
         </View>
 
         <View style={styles.box_2B}>
