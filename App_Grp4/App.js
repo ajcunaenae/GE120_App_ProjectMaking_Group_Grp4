@@ -2,111 +2,16 @@ import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { StyleSheet, Text, TextInput, View, Button } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
-export default function App() {
-    const [fontsLoaded] = useFonts({
-        'Helvetica': require('./assets/fonts/helvetica.ttf'),
-        'Helvetica-Bold': require('./assets/fonts/helvetica-bold.ttf'),
-        'Georgia': require('./assets/fonts/georgia.ttf'),
-        'Georgia-Bold': require('./assets/fonts/georgia-bold.ttf'),
-    });
+const Stack = createStackNavigator();
 
-    // Ensure hooks are called in the same order every render
+function HomeScreen({ navigation }) {
     const [Northing_SO_i, onChangeNorthing_SO] = useState(''); // Northing of the station occupied
     const [Easting_SO_i, onChangeEasting_SO] = useState(''); // Easting of the station occupied
     const [Northing_SS_i, onChangeNorthing_SS] = useState(''); // Northing of the station sighted
     const [Easting_SS_i, onChangeEasting_SS] = useState(''); // Easting of the station sighted
-    const [Azimuth, onChangeAzimuth] = useState('---');
-    const [Distance, onChangeDistance] = useState('---');
-
-    if (!fontsLoaded) {
-        return null; // Prevent rendering until fonts are loaded
-    }
-
-    // Convert input values to float
-    const Northing_SO = parseFloat(Northing_SO_i);
-    const Easting_SO = parseFloat(Easting_SO_i);
-    const Northing_SS = parseFloat(Northing_SS_i);
-    const Easting_SS = parseFloat(Easting_SS_i);
-
-    function getLatitude(Northing_SS, Northing_SO) {
-        /**
-        Determines the latitude of a line
-        
-        Input:
-        Northing of station sighted - number
-        Northing of station occupied - number
-        
-        Output:
-        latitude - number
-         */
-        const latitude = Northing_SS - Northing_SO;
-        return latitude;
-    }
-
-    function getDeparture(Easting_SS, Easting_SO) {
-        /**
-        Determines the departure of a line
-
-        Input:
-        Easting of station sighted - number
-        Easting of station occupied - number
-        
-        Output:
-        departure - number
-        */
-        const departure = Easting_SS - Easting_SO;
-        return departure;
-    }
-
-    // Function to calculate azimuth and distance
-    function getAzimuthandDistance() {    
-        const lat = getLatitude(Northing_SS, Northing_SO);
-        const dep = getDeparture(Easting_SS, Easting_SO);
-        const distance = (Math.sqrt((lat ** 2) + (dep ** 2))).toFixed(3) + " m"; // Calculate distance, format to 3 decimal places
-        onChangeDistance(distance); // Set distance value
-
-        let bearing;
-        if (lat !== 0) {
-            bearing = Math.atan(Math.abs(dep) / Math.abs(lat)) * (180 / Math.PI); // Calculate bearing
-        } else if (lat === 0) {
-            bearing = 0;
-        } else {
-            bearing = "N/A";
-        }
-
-        let azimuth_dd; // Calculate azimuth in decimal degrees
-        if (lat > 0 && dep > 0) {
-            azimuth_dd = bearing;
-        } else if (lat < 0 && dep > 0) {
-            azimuth_dd = 180 - bearing;
-        } else if (lat < 0 && dep < 0) {
-            azimuth_dd = 180 + bearing;
-        } else if (lat > 0 && dep < 0) {
-            azimuth_dd = 360 - bearing;
-        } else if (lat < 0 && dep === 0) {
-            azimuth_dd = 180;
-        } else if (lat > 0 && dep === 0) {
-            azimuth_dd = 0;
-        } else if (lat === 0 && dep > 0) {
-            azimuth_dd = 90;
-        } else if (lat === 0 && dep < 0) {
-            azimuth_dd = 270;
-        } else {
-            azimuth_dd = "N/A";
-        }
-
-        convertToDMS(azimuth_dd); // Convert azimuth_dd value to DMS
-    }
-
-    function convertToDMS(azimuth_dd) {
-        const degrees = Math.floor(azimuth_dd);
-        const minutes = Math.floor((azimuth_dd - degrees) * 60);
-        const seconds = ((azimuth_dd - degrees - (minutes / 60)) * 3600).toFixed(2);
-
-        const azimuth_dms = degrees.toString().concat("-", minutes.toString(), "-", seconds.toString()); // Format azimuth to DDD-MM-SS.ss
-        onChangeAzimuth(azimuth_dms); // Set azimuth value
-    }
 
     return (
         <View style={styles.box}>
@@ -169,13 +74,90 @@ export default function App() {
 
                 <Button
                     title="Compute"
-                    onPress={getAzimuthandDistance}
+                    onPress={() => navigation.navigate('Results', { Northing_SO_i, Easting_SO_i, Northing_SS_i, Easting_SS_i })}
                     style={{backgroundColor: '#F47D91',
                       fontFamily: 'Helvetica',
                     }}
                 />
             </View>
+        </View>
+    );
+}
 
+function ResultsScreen({ route, navigation }) {
+    const { Northing_SO_i, Easting_SO_i, Northing_SS_i, Easting_SS_i } = route.params;
+    const [Azimuth, onChangeAzimuth] = useState('---');
+    const [Distance, onChangeDistance] = useState('---');
+
+    const Northing_SO = parseFloat(Northing_SO_i);
+    const Easting_SO = parseFloat(Easting_SO_i);
+    const Northing_SS = parseFloat(Northing_SS_i);
+    const Easting_SS = parseFloat(Easting_SS_i);
+
+    function getLatitude(Northing_SS, Northing_SO) {
+        const latitude = Northing_SS - Northing_SO;
+        return latitude;
+    }
+
+    function getDeparture(Easting_SS, Easting_SO) {
+        const departure = Easting_SS - Easting_SO;
+        return departure;
+    }
+
+    function getAzimuthandDistance() {    
+        const lat = getLatitude(Northing_SS, Northing_SO);
+        const dep = getDeparture(Easting_SS, Easting_SO);
+        const distance = (Math.sqrt((lat ** 2) + (dep ** 2))).toFixed(3) + " m"; // Calculate distance, format to 3 decimal places
+        onChangeDistance(distance); // Set distance value
+
+        let bearing;
+        if (lat !== 0) {
+            bearing = Math.atan(Math.abs(dep) / Math.abs(lat)) * (180 / Math.PI); // Calculate bearing
+        } else if (lat === 0) {
+            bearing = 0;
+        } else {
+            bearing = "N/A";
+        }
+
+        let azimuth_dd; // Calculate azimuth in decimal degrees
+        if (lat > 0 && dep > 0) {
+            azimuth_dd = bearing;
+        } else if (lat < 0 && dep > 0) {
+            azimuth_dd = 180 - bearing;
+        } else if (lat < 0 && dep < 0) {
+            azimuth_dd = 180 + bearing;
+        } else if (lat > 0 && dep < 0) {
+            azimuth_dd = 360 - bearing;
+        } else if (lat < 0 && dep === 0) {
+            azimuth_dd = 180;
+        } else if (lat > 0 && dep === 0) {
+            azimuth_dd = 0;
+        } else if (lat === 0 && dep > 0) {
+            azimuth_dd = 90;
+        } else if (lat === 0 && dep < 0) {
+            azimuth_dd = 270;
+        } else {
+            azimuth_dd = "N/A";
+        }
+
+        convertToDMS(azimuth_dd); // Convert azimuth_dd value to DMS
+    }
+
+    function convertToDMS(azimuth_dd) {
+        const degrees = Math.floor(azimuth_dd);
+        const minutes = Math.floor((azimuth_dd - degrees) * 60);
+        const seconds = ((azimuth_dd - degrees - (minutes / 60)) * 3600).toFixed(2);
+
+        const azimuth_dms = degrees.toString().concat("-", minutes.toString(), "-", seconds.toString()); // Format azimuth to DDD-MM-SS.ss
+        onChangeAzimuth(azimuth_dms); // Set azimuth value
+    }
+
+    React.useEffect(() => {
+        getAzimuthandDistance();
+    }, []);
+
+    return (
+        <View style={styles.box}>
             <View style={styles.box_3}>
                 <View style={styles.box_resultA}>
                     <Text style={styles.text_result1}>Azimuth from the North:</Text>
@@ -186,8 +168,38 @@ export default function App() {
                     <Text style={styles.text_result1}>Backsight Distance:</Text>
                     <Text style={styles.text_result2}>{Distance}</Text>
                 </View>
+
+                <Button
+                    title="Back"
+                    onPress={() => navigation.goBack()}
+                    style={{backgroundColor: '#F47D91',
+                      fontFamily: 'Helvetica',
+                    }}
+                />
             </View>
         </View>
+    );
+}
+
+export default function App() {
+    const [fontsLoaded] = useFonts({
+        'Helvetica': require('./assets/fonts/helvetica.ttf'),
+        'Helvetica-Bold': require('./assets/fonts/helvetica-bold.ttf'),
+        'Georgia': require('./assets/fonts/georgia.ttf'),
+        'Georgia-Bold': require('./assets/fonts/georgia-bold.ttf'),
+    });
+
+    if (!fontsLoaded) {
+        return null; // Prevent rendering until fonts are loaded
+    }
+
+    return (
+        <NavigationContainer>
+            <Stack.Navigator initialRouteName="Home">
+                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="Results" component={ResultsScreen} />
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 }
 

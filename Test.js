@@ -1,234 +1,329 @@
-import React from 'react'
-import { Picker } from '@react-native-picker/picker';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, TextInput, View, Button} from 'react-native';
+import { useFonts } from 'expo-font';
+import { StyleSheet, Text, TextInput, View, Button } from 'react-native';
 
 export default function App() {
+    const [fontsLoaded] = useFonts({
+        'Helvetica': require('./assets/fonts/helvetica.ttf'),
+        'Helvetica-Bold': require('./assets/fonts/helvetica-bold.ttf'),
+        'Georgia': require('./assets/fonts/georgia.ttf'),
+        'Georgia-Bold': require('./assets/fonts/georgia-bold.ttf'),
+    });
 
-  const [value, onChangeValue] = React.useState('---');
-  const [inputValue, onChangeinputValue] = React.useState('Input value here:');
-  const [inputCase,setInputCase] = React.useState ("Select case");
+    const [Northing_SO_i, onChangeNorthing_SO] = useState(''); // Northing of the station occupied
+    const [Easting_SO_i, onChangeEasting_SO] = useState(''); // Easting of the station occupied
+    const [Northing_SS_i, onChangeNorthing_SS] = useState(''); // Northing of the station sighted
+    const [Easting_SS_i, onChangeEasting_SS] = useState(''); // Easting of the station sighted
+    const [Azimuth, onChangeAzimuth] = useState('---');
+    const [Distance, onChangeDistance] = useState('---');
 
-  const prompt = require ("prompt-sync")({sigint: true})
-const { degrees, sqrt, atan } = Math;
+    if (!fontsLoaded) {
+        return null; // Prevent rendering until fonts are loaded
+    }
 
-function getLatitude(Northing_SS, Northing_SO) {
-  /**
-   * Determines the latitude of a line
-   *
-   * Input:
-   * Northing of station string - number
-   * Northing of station occupied - number
-   *
-   * Output:
-   * latitude - number
-   */
+    // Convert input values to float
+    const Northing_SO = parseFloat(Northing_SO_i);
+    const Easting_SO = parseFloat(Easting_SO_i);
+    const Northing_SS = parseFloat(Northing_SS_i);
+    const Easting_SS = parseFloat(Easting_SS_i);
 
-  const latitude = Northing_SS - Northing_SO;
-  return latitude;
-}
+    function getLatitude(Northing_SS, Northing_SO) {
+        /**
+        Determines the latitude of a line
+        
+        Input:
+        Northing of station sighted - number
+        Northing of station occupied - number
+        
+        Output:
+        latitude - number
+         */
+        const latitude = Northing_SS - Northing_SO;
+        return latitude;
+    }
 
-function getDeparture(Easting_SS, Easting_SO) {
-  /**
-   * Determines the latitude of a line
-   *
-   * Input:
-   * Easting of station string - number
-   * Easting of station occupied - number
-   *
-   * Output:
-   * departure - number
-   */
+    function getDeparture(Easting_SS, Easting_SO) {
+        /**
+        Determines the departure of a line
 
-  const departure = Easting_SS - Easting_SO;
-  return departure;
-}
+        Input:
+        Easting of station sighted - number
+        Easting of station occupied - number
+        
+        Output:
+        departure - number
+        */
+        const departure = Easting_SS - Easting_SO;
+        return departure;
+    }
 
-const Northing_SS = parseFloat(prompt("Northing of Station Sighted: "));
-const Easting_SS = parseFloat(prompt("Easting of Station Sighted: "));
-const Northing_SO = parseFloat(prompt("Northing of Station Occupied: "));
-const Easting_SO = parseFloat(prompt("Easting of Station Occupied: "));
+    // Function to calculate azimuth and distance
+    function getValues() {    
+        const lat = getLatitude(Northing_SS, Northing_SO);
+        const dep = getDeparture(Easting_SS, Easting_SO);
+        const distance = (Math.sqrt((lat ** 2) + (dep ** 2))).toFixed(3) + " m"; // Calculate distance, format to 3 decimal places
+        onChangeDistance(distance); // Set distance value
 
-const lat = getLatitude(Northing_SS, Northing_SO);
-const dep = getDeparture(Easting_SS, Easting_SO);
+        let bearing;
+        if (lat !== 0) {
+            bearing = Math.atan(Math.abs(dep) / Math.abs(lat)) * (180 / Math.PI); // Calculate bearing
+        } else if (lat === 0) {
+            bearing = 0;
+        } else {
+            bearing = "N/A";
+        }
 
-let bearing;
-if (lat > 0 || lat < 0) {
-  bearing =  Math.atan(Math.abs(dep) / Math.abs(lat)) * (180 / Math.PI);
-} else if (lat === 0) {
-  bearing = 0;
-} else {
-  bearing = "N/A";
-}
+        let azimuth_dd; // Calculate azimuth in decimal degrees
+        if (lat > 0 && dep > 0) {
+            azimuth_dd = bearing;
+        } else if (lat < 0 && dep > 0) {
+            azimuth_dd = 180 - bearing;
+        } else if (lat < 0 && dep < 0) {
+            azimuth_dd = 180 + bearing;
+        } else if (lat > 0 && dep < 0) {
+            azimuth_dd = 360 - bearing;
+        } else if (lat < 0 && dep === 0) {
+            azimuth_dd = 180;
+        } else if (lat > 0 && dep === 0) {
+            azimuth_dd = 0;
+        } else if (lat === 0 && dep > 0) {
+            azimuth_dd = 90;
+        } else if (lat === 0 && dep < 0) {
+            azimuth_dd = 270;
+        } else {
+            azimuth_dd = "N/A";
+        }
 
-console.log(bearing);
+        convertToDMS(azimuth_dd); // Convert azimuth_dd value to DMS
+    }
 
-let azimuth_dd;
-if (lat > 0 && dep > 0) {
-  azimuth_dd = bearing;
-} else if (lat < 0 && dep > 0) {
-  azimuth_dd = 180 - bearing;
-} else if (lat < 0 && dep < 0) {
-  azimuth_dd = 180 + bearing;
-} else if (lat > 0 && dep < 0) {
-  azimuth_dd = 360 - bearing;
-} else if (lat < 0 && dep === 0) {
-  azimuth_dd = 180 + bearing;
-} else if (lat > 0 && dep === 0) {
-  azimuth_dd = bearing;
-} else if (lat === 0 && dep > 0) {
-  azimuth_dd = 90 + bearing;
-} else if (lat === 0 && dep < 0) {
-  azimuth_dd = 270 + bearing;
-} else {
-  azimuth_dd = "NA";
-}
+    function convertToDMS(azimuth_dd) {
+        const degrees = Math.floor(azimuth_dd);
+        const minutes = Math.floor((azimuth_dd - degrees) * 60);
+        const seconds = ((azimuth_dd - degrees - (minutes / 60)) * 3600).toFixed(2);
 
-const degree = Math.floor(azimuth_dd);
-const minutes = (azimuth_dd - degree) * 60;
-const minutes_fractional = Math.floor(minutes);
-const seconds = (minutes - minutes_fractional) * 60;
+        const azimuth_dms = degrees.toString().concat("-", minutes.toString(), "-", seconds.toString()); // Format azimuth to DDD-MM-SS.ss
+        onChangeAzimuth(azimuth_dms); // Set azimuth value
+    }
 
+    return (
+        <View style={styles.box}>
+            <View style={styles.box_title}>
+                <Text style={styles.text_title}>BACKSIGHT CALCULATOR!</Text>
+            </View>
 
-console.log(`Azimuth from the North: ${degree}-${minutes_fractional}-${seconds.toFixed (2)}`);
+            <View style={styles.box_2}>
+                <View style={styles.box_SO}>
+                    <Text style={styles.text_station}>STATION OCCUPIED</Text>
+                </View>
 
-const Distance = (sqrt((lat ** 2) + (dep ** 2))).toFixed (3);
-console.log("Distance: ", Distance);
-  
-  return (
-    <View style={styles.box}>
-      <View style={styles.box_1}>
-        <Text style={styles.titleText}>BACKSIGHT CALCULATOR!</Text>
-      </View>
-      
-      <View style={styles.box_2}>
-        <View style={styles.box_2A}>
-          <Text style={styles.case_design}>Station Occupied</Text>
+                <View style={styles.box_SO_N}>
+                    <Text style={styles.text_NE}>Northing: </Text>
+                    <TextInput
+                        style={styles.text_inputN}
+                        onChangeText={onChangeNorthing_SO}
+                        value={Northing_SO_i}
+                        placeholder="Input text"
+                        keyboardType="numeric" // Allow only numbers as input
+                    />
+                </View>
+
+                <View style={styles.box_SO_E}>
+                    <Text style={styles.text_NE}>Easting: </Text>
+                    <TextInput
+                        style={styles.text_inputE}
+                        onChangeText={onChangeEasting_SO}
+                        value={Easting_SO_i}
+                        placeholder="Input text"
+                        keyboardType="numeric"
+                    />
+                </View>
+
+                <View style={styles.box_SS}>
+                    <Text style={styles.text_station}>STATION SIGHTED</Text>
+                </View>
+
+                <View style={styles.box_SS_N}>
+                    <Text style={styles.text_NE}>Northing: </Text>
+                    <TextInput
+                        style={styles.text_inputN}
+                        onChangeText={onChangeNorthing_SS}
+                        value={Northing_SS_i}
+                        placeholder="Input text"
+                        keyboardType="numeric"
+                    />
+                </View>
+
+                <View style={styles.box_SS_E}>
+                    <Text style={styles.text_NE}>Easting: </Text>
+                    <TextInput
+                        style={styles.text_inputE}
+                        onChangeText={onChangeEasting_SS}
+                        value={Easting_SS_i}
+                        placeholder="Input text"
+                        keyboardType="numeric"
+                    />
+                </View>
+
+                <Button
+                    title="Compute"
+                    onPress={getValues}
+                    style={{backgroundColor: '#F47D91',
+                      fontFamily: 'Helvetica',
+                    }}
+                />
+            </View>
+
+            <View style={styles.box_3}>
+                <View style={styles.box_resultA}>
+                    <Text style={styles.text_result1}>Azimuth from the North:</Text>
+                    <Text style={styles.text_result2}>{Azimuth}</Text>
+                </View>
+
+                <View style={styles.box_resultD}>
+                    <Text style={styles.text_result1}>Backsight Distance:</Text>
+                    <Text style={styles.text_result2}>{Distance}</Text>
+                </View>
+            </View>
         </View>
-
-        <View style={styles.box_2B}>
-        <TextInput
-        style={styles.input}
-        onChangeText={onChangeinputValue}
-        value={inputValue}
-      />
-       <Button
-      title="Convert"
-      onPress={() => convertValue(inputValue)}
-      /> 
-        </View>
-      </View>
-
-      <View style={styles.box_3}>
-      <View style={styles.box_3A}>
-        <Text style={styles.result_box}>Result:</Text>
-        <Text style={styles.result_box}>{value}</Text>
-        </View>
-      </View>
-
-      <View style={styles.box_4}>
-      <Text style={styles.titleQuote}>Sometimes, we need to convert things in our lives for us to attain our desires.</Text>
-      </View>
-    </View>
-  );
+    );
 }
-
-/*
-The following section contains the designs and layout of each box.
-*/
 
 const styles = StyleSheet.create({
-  box: {
-    flex: 1,
-    backgroundColor: '#1d2951',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  box_1: {
-    width: '100%',
-    height: '15%',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  titleText: {
-    fontSize: 30,
-    fontWeight: '600',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'serif',
-    color: "white"
-  },
-  box_2: {
-    width: '100%',
-    height: '35%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10
-  },
-  box_2A: {
-    flexDirection: 'column',
-    backgroundColor: '#FFF6CC',
-    width: '100%',
-    height: '50%',
-    padding: 10
-  },
-  case_design: {
-    fontSize: 24,
-    fontWeight: '200',
-    fontFamily: 'serif',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'black'
-  },
-  box_2B: {
-    flex: 1,
-    backgroundColor: '#FFF6CC',
-    width: '100%',
-    height: '50%'
-  },
-  input: {
-    height: '50%',
-    width: '70%',
-    fontSize: 40,
-    color: 'black',
-    fontFamily: 'serif',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  box_3: {
-    width: '100%',
-    height: '35%',
-    padding: 10
-  },
-  box_3A: {
-    flex: 1,
-    backgroundColor: '#FFF6CC',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  result_box: {
-    fontSize: 50,
-    fontWeight: '600',
-    fontFamily: 'serif',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'black'
-  },
-  box_4: {
-    width: '100%',
-    height: '15%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10
-  },
-  titleQuote: {
-    fontSize: 15,
-    fontWeight: '600',
-    fontFamily: 'serif',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white'
-  },
+    box: {
+        flex: 1,
+        backgroundColor: '#FF8FBD',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    box_title: {
+        width: '100%',
+        height: '20%',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    text_title: {
+        fontSize: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Helvetica-Bold',
+        color: "white"
+    },
+    box_2: {
+        width: '100%',
+        height: '45%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 10
+    },
+    box_SO: {
+        flexDirection: 'column',
+        backgroundColor: '#F8DAE1',
+        width: '100%',
+        height: '10%',
+        padding: 10
+    },
+    box_SO_N: {
+        flexDirection: 'row',
+        backgroundColor: '#F8DAE1',
+        width: '100%',
+        height: '20%',
+        padding: 10
+    },
+    box_SO_E: {
+        flexDirection: 'row',
+        backgroundColor: '#F8DAE1',
+        width: '100%',
+        height: '20%',
+        padding: 10
+    },
+    box_SS: {
+        flexDirection: 'column',
+        backgroundColor: '#F8DAE1',
+        width: '100%',
+        height: '10%',
+        padding: 10
+    },
+    box_SS_N: {
+        flexDirection: 'row',
+        backgroundColor: '#F8DAE1',
+        width: '100%',
+        height: '20%',
+        padding: 10
+    },
+    box_SS_E: {
+        flexDirection: 'row',
+        backgroundColor: '#F8DAE1',
+        width: '100%',
+        height: '20%',
+        padding: 10
+    },
+    text_station: {
+        fontSize: 28,
+        fontFamily: 'Georgia-Bold',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'black'
+    },
+    text_NE: {
+        fontSize: 30,
+        fontFamily: 'Georgia-Bold',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'black'
+    },
+    text_inputN: {
+        height: 40,
+        width: '70%',
+        fontSize: 30,
+        color: 'black',
+        fontFamily: 'Georgia',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    text_inputE: {
+        height: 40,
+        width: '70%',
+        fontSize: 30,
+        color: 'black',
+        fontFamily: 'Georgia',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    box_3: {
+        width: '100%',
+        height: '35%',
+        padding: 10
+    },
+    box_resultA: {
+        flex: 1,
+        backgroundColor: '#F8DAE1',
+        width: '100%',
+        height: '50%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    box_resultD: {
+        flex: 1,
+        backgroundColor: '#F8DAE1',
+        width: '100%',
+        height: '50%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    text_result1: {
+        fontSize: 30,
+        fontFamily: 'Georgia-Bold',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'black'
+    },
+    text_result2: {
+        fontSize: 40,
+        fontFamily: 'Georgia',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'black'
+    },
 });
