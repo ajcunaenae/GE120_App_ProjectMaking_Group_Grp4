@@ -11,6 +11,7 @@ export default function App() {
         'Georgia-Bold': require('./assets/fonts/georgia-bold.ttf'),
     });
 
+    // Ensure hooks are called in the same order every render
     const [Northing_SO_i, onChangeNorthing_SO] = useState(''); // Northing of the station occupied
     const [Easting_SO_i, onChangeEasting_SO] = useState(''); // Easting of the station occupied
     const [Northing_SS_i, onChangeNorthing_SS] = useState(''); // Northing of the station sighted
@@ -59,7 +60,7 @@ export default function App() {
     }
 
     // Function to calculate azimuth and distance
-    function getValues() {    
+    function getAzimuthandDistance() {    
         const lat = getLatitude(Northing_SS, Northing_SO);
         const dep = getDeparture(Easting_SS, Easting_SO);
         const distance = (Math.sqrt((lat ** 2) + (dep ** 2))).toFixed(3) + " m"; // Calculate distance, format to 3 decimal places
@@ -168,7 +169,7 @@ export default function App() {
 
                 <Button
                     title="Compute"
-                    onPress={getValues}
+                    onPress={getAzimuthandDistance}
                     style={{backgroundColor: '#F47D91',
                       fontFamily: 'Helvetica',
                     }}
