@@ -172,10 +172,11 @@ function ResultsScreen({ route, navigation }) {
             azimuth_dd = "N/A";
         }
 
-        convertToDMS(azimuth_dd); // Convert azimuth to DMS format
+        convertToDMS(azimuth_dd);
     }
 
     function convertToDMS(azimuth_dd) {
+        // Convert azimuth from decimal degrees to DMS format
         const degrees = Math.floor(azimuth_dd);
         const minutes = Math.floor((azimuth_dd - degrees) * 60);
         const seconds = ((azimuth_dd - degrees - (minutes / 60)) * 3600).toFixed(2); // Format seconds to two decimal places
